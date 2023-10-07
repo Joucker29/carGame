@@ -1,7 +1,16 @@
 import pygame, sys, random, math
 
+def sign(num):
+    result = 1
+    if num < 0:
+        result = -1
+    return result
+
+
 pygame.init()
 
+TPS = 240
+clock = pygame.time.Clock()
 
 windowWidth = int(1200)
 windowHeight = int((windowWidth/16)*9)
@@ -15,10 +24,13 @@ height = 10
 angle = 0
 langle = 0
 
-rotSpeed = 0.5
+rotSpeed = 1
 
-speed = 1 # const (DO NOT CHANGE IN CODE)
-curSpeed = speed
+
+drag = 0.008
+acceleration = 0.02
+curSpeed = 0
+maxSpeed = 1.5
 
 
 carSprite = pygame.image.load("car.png")
@@ -31,7 +43,6 @@ game = True
 paused = False
 lastPaused = False
 while run:
-
     keyPressed = pygame.key.get_pressed()
 
     if lastPaused == False and keyPressed[pygame.K_p] == True:
@@ -54,10 +65,10 @@ while run:
         keyPressed = pygame.key.get_pressed()
         if keyPressed[pygame.K_ESCAPE]:
             game = False
+
+        # hand Break
         if keyPressed[pygame.K_SPACE]:
-            curSpeed = speed/2
-        else:
-            curSpeed = speed
+            curSpeed = 0
         
         if keyPressed[pygame.K_a]:
             angle += rotSpeed
@@ -71,25 +82,36 @@ while run:
 
         radAngle = (-1*angle-90)*math.pi/180
         if keyPressed[pygame.K_w]:
-            carPos[0] += math.cos(radAngle)*curSpeed
-            carPos[1] += math.sin(radAngle)*curSpeed
+            curSpeed += acceleration
         if keyPressed[pygame.K_s]:
-            carPos[0] -= math.cos(radAngle)*curSpeed
-            carPos[1] -= math.sin(radAngle)*curSpeed
+            curSpeed -= acceleration
 
+
+
+        # check max speed
+        if curSpeed >= maxSpeed:
+            curSpeed = maxSpeed
+        #drag
+        curSpeed += sign(curSpeed)*drag*-1
+
+        # move car
+        carPos[0] += math.cos(radAngle)*curSpeed
+        carPos[1] += math.sin(radAngle)*curSpeed
+
+        # Debug print
         if (angle != langle):
             print(angle)
         
         carRotated = pygame.transform.rotate(carSprite, angle)
         carFinal = carRotated.get_rect(center = (carPos[0], carPos[1]))
 
-
-
         window.blit(carRotated, carFinal)
 
 
         langle = angle
         pygame.display.update()
+        clock.tick(TPS)
     
 
     lastPaused = keyPressed[pygame.K_p]
+    clock.tick(TPS)
