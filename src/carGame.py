@@ -27,11 +27,11 @@ langle = 0
 rotSpeed = 1
 
 
-drag = 0.008
+drag = 0.001
 acceleration = 0.02
 curSpeed = 0
-maxSpeed = 1.5
-
+maxSpeedForward = 1.5
+maxSpeedBackwards = -0.5
 
 carSprite = pygame.image.load("car.png")
 carSprite = pygame.transform.scale(carSprite, (width, height))
@@ -61,7 +61,6 @@ while run:
                 game = False
                 run = False
         
-        
         keyPressed = pygame.key.get_pressed()
         if keyPressed[pygame.K_ESCAPE]:
             game = False
@@ -83,14 +82,18 @@ while run:
         radAngle = (-1*angle-90)*math.pi/180
         if keyPressed[pygame.K_w]:
             curSpeed += acceleration
+            
+            # check max speed
+            if curSpeed >= maxSpeedForward:
+                curSpeed = maxSpeedForward
+
         if keyPressed[pygame.K_s]:
             curSpeed -= acceleration
 
+            # check max speed
+            if curSpeed <= maxSpeedBackwards:
+                curSpeed = maxSpeedBackwards
 
-
-        # check max speed
-        if curSpeed >= maxSpeed:
-            curSpeed = maxSpeed
         #drag
         curSpeed += sign(curSpeed)*drag*-1
 
@@ -99,8 +102,10 @@ while run:
         carPos[1] += math.sin(radAngle)*curSpeed
 
         # Debug print
-        if (angle != langle):
-            print(angle)
+        # if (angle != langle):
+        #     print(angle)
+        # if curSpeed > 1.499:
+        #     print(curSpeed)
         
         carRotated = pygame.transform.rotate(carSprite, angle)
         carFinal = carRotated.get_rect(center = (carPos[0], carPos[1]))

@@ -1,4 +1,5 @@
 Slower turning (something like acceleration for turning)
+Add gear shift?
 Add drifting
 Add colisions
 Add multiplayer
