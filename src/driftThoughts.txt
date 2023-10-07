@@ -1,0 +1,12 @@
+How i think drifting works:
+    When you drive and turn there is a centrifical force that is aplyed to your car.
+    The grip of the tiers lests you stick to the road and when the stickiness of your tiers is overcome by centrifical fore you go into a drift.
+    When you break centrifical force overcomes the stickiness of your tiers easier.
+
+Implemntation:
+    Create variable for tire stickiness
+    Create centrifical force. Centrifical force has to be dependant of acceleration and how much you turn.
+    When you break the stickiness variable decreases? Not so sure how to implement this.
+
+Final thoughts:
+    There may be a easier way to implement this but this is what i came up with and that's what im gonna do.

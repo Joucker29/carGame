@@ -1,4 +1,4 @@
-Add colisions
+Slower turning (something like acceleration for turning)
 Add drifting
-Add clock
+Add colisions
 Add multiplayer
