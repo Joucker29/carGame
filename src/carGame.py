@@ -33,6 +33,7 @@ rotSpeed = 1
 
 
 drag = 0.001
+breakSpeed = 0.02
 acceleration = 0.02
 curSpeed = 0
 maxSpeedForward = 1.5
@@ -43,6 +44,7 @@ carSprite = pygame.transform.scale(carSprite, (width, height))
 
 # Scroll
 scroll = [0, 0]
+scrollLast = scroll
 
 scrollWidthDisplacment = windowWidth/15
 scrollHeightDisplacment = windowHeight/15
@@ -86,9 +88,6 @@ while run:
         if keyPressed[pygame.K_ESCAPE]:
             game = False
 
-        # hand Break
-        if keyPressed[pygame.K_SPACE]:
-            curSpeed = 0
         
         # Controls
         if keyPressed[pygame.K_a]:
@@ -119,12 +118,28 @@ while run:
         # drag
         curSpeed += sign(curSpeed)*drag*-1
 
+
+        # hand Break
+        direction = [math.cos(radAngle)*curSpeed, math.sin(radAngle)*curSpeed]
+        if keyPressed[pygame.K_SPACE]:
+            curSpeed -= breakSpeed
+
+            if curSpeed <=0:
+                curSpeed = 0
+            
+            if keyPressed[pygame.K_a]:
+                direction[0] -= math.cos(radAngle-math.pi/2)*curSpeed
+                direction[1] -= math.sin(radAngle-math.pi/2)*curSpeed
+            if keyPressed[pygame.K_d]:
+                direction[0] += math.cos(radAngle-math.pi/2)*curSpeed
+                direction[1] += math.sin(radAngle-math.pi/2)*curSpeed
+
         # # move car
         # carPos[0] += math.cos(radAngle)*curSpeed
         # carPos[1] += math.sin(radAngle)*curSpeed
         # Scroll
-        scroll[0] = math.cos(radAngle)*curSpeed
-        scroll[1] = math.sin(radAngle)*curSpeed        
+        scroll[0] = direction[0]
+        scroll[1] = direction[1]
 
 
             
@@ -137,15 +152,14 @@ while run:
 
         # Drawing particles
         for i in range(len(particlesPos)):
-            particlesPos[i][0] += scroll[0]
-            particlesPos[i][1] += scroll[1]
+            particlesPos[i][0] -= scroll[0]
+            particlesPos[i][1] -= scroll[1]
 
             pygame.draw.circle(window, particleColor, particlesPos[i], particleRadius, 0)
-
 
         langle = angle
         pygame.display.update()
         clock.tick(TPS)
-    
+
     lastPaused = keyPressed[pygame.K_p]
     clock.tick(TPS)
