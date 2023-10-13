@@ -12,14 +12,19 @@ pygame.init()
 TPS = 240
 clock = pygame.time.Clock()
 
+
+bgColor = (113, 121, 126)
+
 windowWidth = int(1200)
 windowHeight = int((windowWidth/16)*9)
 
 window = pygame.display.set_mode((windowWidth, windowHeight))
 
-carPos = [windowWidth/2 + 100, windowHeight/2 - 60]
+
 width = 5
 height = 10
+
+carPos = [windowWidth/2 - width/2, windowHeight/2 - height/2]
 
 angle = 0
 langle = 0
@@ -36,7 +41,23 @@ maxSpeedBackwards = -0.5
 carSprite = pygame.image.load("car.png")
 carSprite = pygame.transform.scale(carSprite, (width, height))
 
+# Scroll
+scroll = [0, 0]
 
+scrollWidthDisplacment = windowWidth/15
+scrollHeightDisplacment = windowHeight/15
+
+# Particles:
+particlesPos = []
+particleAmount = 50
+particleRadius = 2
+particleColor = (255, 255, 255)
+
+for i in range(particleAmount):
+    particlesPos.append([random.randint(0, windowWidth), random.randint(0, windowHeight)])
+
+
+# Game states
 run = True
 game = True
 
@@ -55,7 +76,7 @@ while run:
              run = False
         
     while game:
-        window.fill((0,0,0)) 
+        window.fill(bgColor) 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game = False
@@ -69,6 +90,7 @@ while run:
         if keyPressed[pygame.K_SPACE]:
             curSpeed = 0
         
+        # Controls
         if keyPressed[pygame.K_a]:
             angle += rotSpeed
         if keyPressed[pygame.K_d]:
@@ -94,29 +116,36 @@ while run:
             if curSpeed <= maxSpeedBackwards:
                 curSpeed = maxSpeedBackwards
 
-        #drag
+        # drag
         curSpeed += sign(curSpeed)*drag*-1
 
-        # move car
-        carPos[0] += math.cos(radAngle)*curSpeed
-        carPos[1] += math.sin(radAngle)*curSpeed
+        # # move car
+        # carPos[0] += math.cos(radAngle)*curSpeed
+        # carPos[1] += math.sin(radAngle)*curSpeed
+        # Scroll
+        scroll[0] = math.cos(radAngle)*curSpeed
+        scroll[1] = math.sin(radAngle)*curSpeed        
 
-        # Debug print
-        # if (angle != langle):
-        #     print(angle)
-        # if curSpeed > 1.499:
-        #     print(curSpeed)
-        
+
+            
+
         carRotated = pygame.transform.rotate(carSprite, angle)
         carFinal = carRotated.get_rect(center = (carPos[0], carPos[1]))
 
+        # Drawing car
         window.blit(carRotated, carFinal)
+
+        # Drawing particles
+        for i in range(len(particlesPos)):
+            particlesPos[i][0] += scroll[0]
+            particlesPos[i][1] += scroll[1]
+
+            pygame.draw.circle(window, particleColor, particlesPos[i], particleRadius, 0)
 
 
         langle = angle
         pygame.display.update()
         clock.tick(TPS)
     
-
     lastPaused = keyPressed[pygame.K_p]
     clock.tick(TPS)
