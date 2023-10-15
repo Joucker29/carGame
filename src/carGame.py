@@ -6,6 +6,13 @@ def sign(num):
         result = -1
     return result
 
+def colide(rect1, rect2):
+    # (x, y, width, height)
+    colision = False
+    if rect1[0] + rect1[2] > rect2[0] and rect1[1] + rect1[3] > rect2[1] and rect1[0] < rect2[0] + rect2[2] and rect1[1] < rect2[1] + rect2[3]:
+        colision = True
+    return colision
+
 
 pygame.init()
 
@@ -53,6 +60,8 @@ scrollHeightDisplacment = windowHeight/15
 particlesPos = []
 particleAmount = 50
 particleRadius = 2
+particleWidth = 2
+particleHeight = 2
 particleColor = (255, 255, 255)
 
 for i in range(particleAmount):
@@ -92,8 +101,16 @@ while run:
         # Controls
         if keyPressed[pygame.K_a]:
             angle += rotSpeed
+        else:
+            if keyPressed[pygame.K_LEFT]:
+                angle += rotSpeed
+                
         if keyPressed[pygame.K_d]:
             angle -= rotSpeed
+        else:
+            if keyPressed[pygame.K_RIGHT]:
+                angle -= rotSpeed
+
 
         if angle > 180:
             angle = angle*-1 + rotSpeed
@@ -107,6 +124,13 @@ while run:
             # check max speed
             if curSpeed >= maxSpeedForward:
                 curSpeed = maxSpeedForward
+        else:
+            if keyPressed[pygame.K_UP]:
+                curSpeed += acceleration
+                
+                # check max speed
+                if curSpeed >= maxSpeedForward:
+                    curSpeed = maxSpeedForward
 
         if keyPressed[pygame.K_s]:
             curSpeed -= acceleration
@@ -114,6 +138,13 @@ while run:
             # check max speed
             if curSpeed <= maxSpeedBackwards:
                 curSpeed = maxSpeedBackwards
+        else:
+            if keyPressed[pygame.K_DOWN]:
+                curSpeed -= acceleration
+
+                # check max speed
+                if curSpeed <= maxSpeedBackwards:
+                    curSpeed = maxSpeedBackwards
 
         # drag
         curSpeed += sign(curSpeed)*drag*-1
@@ -130,9 +161,18 @@ while run:
             if keyPressed[pygame.K_a]:
                 direction[0] -= math.cos(radAngle-math.pi/2)*curSpeed
                 direction[1] -= math.sin(radAngle-math.pi/2)*curSpeed
+            else:
+                if keyPressed[pygame.K_LEFT]:
+                    direction[0] -= math.cos(radAngle-math.pi/2)*curSpeed
+                    direction[1] -= math.sin(radAngle-math.pi/2)*curSpeed
+                
             if keyPressed[pygame.K_d]:
                 direction[0] += math.cos(radAngle-math.pi/2)*curSpeed
                 direction[1] += math.sin(radAngle-math.pi/2)*curSpeed
+            else:
+                if keyPressed[pygame.K_RIGHT]:
+                    direction[0] += math.cos(radAngle-math.pi/2)*curSpeed
+                    direction[1] += math.sin(radAngle-math.pi/2)*curSpeed
 
         # # move car
         # carPos[0] += math.cos(radAngle)*curSpeed
@@ -155,7 +195,10 @@ while run:
             particlesPos[i][0] -= scroll[0]
             particlesPos[i][1] -= scroll[1]
 
-            pygame.draw.circle(window, particleColor, particlesPos[i], particleRadius, 0)
+            if colide((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight), (carPos[0], carPos[1], width, height)):
+                particlesPos.remove(particlesPos[i])
+            else:
+                pygame.draw.rect(window, particleColor, (particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))
 
         langle = angle
         pygame.display.update()
