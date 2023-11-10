@@ -13,43 +13,31 @@ def colide(rect1, rect2):
         colision = True
     return colision
 
-def rotatedPoints(rect, angle):
+def rotatedPoints(rect, angle, skewAngle=False, hypotnuseLength=False):
     # deg to rad
     radAngle = angle*math.pi/180
     radAngle=-radAngle
 
-    
-    #radAngle=-radAngle
-    #radAngle = radAngle-math.pi/2
-
     x=rect[0]
     y=rect[1]
-    _width=rect[2]
-    _height=rect[3]
-
     vertecies = [(0, 0),(0, 0),(0, 0),(0, 0)]
-    origVertecies = [(0, 0),(0, 0),(0, 0),(0, 0)]
+
+    if (skewAngle == False):
+        skewAngle = math.acos((rect[2]/2)/(((rect[2]/2)**2+(rect[3]/2)**2)**0.5))
+    if (hypotnuseLength == False):
+        hypotnuseLength = math.sqrt(((rect[2]/2)**2)+((rect[3]/2)**2))
 
 
-    pointLength = math.sqrt(((_width/2)**2)+((_height/2)**2))
-    skewAngle = math.acos((_width/2)/(((_width/2)**2+(_height/2)**2)**0.5))
+    vertecies[0] = (x+math.cos(radAngle-skewAngle-math.pi)*hypotnuseLength, y+math.sin(radAngle-skewAngle-math.pi)*hypotnuseLength)#topLeft
+    vertecies[1] = (x+math.cos(radAngle-skewAngle)*hypotnuseLength, y+math.sin(radAngle-skewAngle)*hypotnuseLength)#topRight
+    vertecies[3] = (x+math.cos(radAngle+skewAngle+math.pi)*hypotnuseLength, y+math.sin(radAngle+skewAngle+math.pi)*hypotnuseLength)#bottomLeft
+    vertecies[2] = (x+math.cos(radAngle+skewAngle)*hypotnuseLength, y+math.sin(radAngle+skewAngle)*hypotnuseLength)#bottomRight
 
-    origVertecies[0] = (x-_width/2, y-_height/2)
-
-    #print(radAngle)
-    #print(x,y)
-    vertecies[0] = (x+math.cos(radAngle-skewAngle-math.pi)*pointLength, y+math.sin(radAngle-skewAngle-math.pi)*pointLength)#topLeft
-    vertecies[1] = (x+math.cos(radAngle-skewAngle)*pointLength, y+math.sin(radAngle-skewAngle)*pointLength)#topRight
-    vertecies[3] = (x+math.cos(radAngle+skewAngle+math.pi)*pointLength, y+math.sin(radAngle+skewAngle+math.pi)*pointLength)#bottomLeft
-    vertecies[2] = (x+math.cos(radAngle+skewAngle)*pointLength, y+math.sin(radAngle+skewAngle)*pointLength)#bottomRight
-
-
-    #pygame.draw.rect(window, (255,0,0), (vertecies[0][0], vertecies[0][1], 3, 3))
+    # debuging
     for i in range(0,4):
         print("x, y "+str(i)+": ",vertecies[i][0], vertecies[i][1])
         pygame.draw.circle(window, (255,0,0), (vertecies[i][0], vertecies[i][1]), 3)
 
-    
     
 
 
@@ -67,13 +55,16 @@ windowHeight = int((windowWidth/16)*9)
 window = pygame.display.set_mode((windowWidth, windowHeight))
 
 
-width = 20
-height = 40
+carWidth = 20
+carHeight = 40
 
-carPos = [windowWidth/2 - width/2, windowHeight/2 - height/2, width, height]
+carPos = [windowWidth/2 - carWidth/2, windowHeight/2 - carHeight/2, carWidth, carHeight]
+
+carSkewAngle = math.acos((carWidth/2)/(((carWidth/2)**2+(carHeight/2)**2)**0.5))
+carHypotnuseLength = math.sqrt(((carWidth/2)**2)+((carHeight/2)**2))
 
 carSprite = pygame.image.load("car.png").convert_alpha()
-carSprite = pygame.transform.scale(carSprite, (width, height))
+carSprite = pygame.transform.scale(carSprite, (carWidth, carHeight))
 carSpriteMask = pygame.mask.from_surface(carSprite)
 
 angle = 0
@@ -229,7 +220,7 @@ while run:
 
         # Drawing car
         window.blit(carRotated, carFinal)
-        rotatedPoints((carPos[0], carPos[1], width, height), angle)
+        rotatedPoints((carPos[0], carPos[1], carWidth, carHeight), angle, carSkewAngle, carHypotnuseLength)
 
         # Drawing particles
         for i in range(len(particlesPos)):
@@ -237,7 +228,7 @@ while run:
             particlesPos[i][0] -= scroll[0]
             particlesPos[i][1] -= scroll[1]
 
-            if colide((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight), (carPos[0], carPos[1], width, height)):
+            if colide((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight), (carPos[0], carPos[1], carWidth, carHeight)):
                 #particlesPos.remove(particlesPos[i])
                 pygame.draw.rect(window, particleCollideColor, (particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))
             else:
