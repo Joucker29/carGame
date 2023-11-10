@@ -28,7 +28,7 @@ def getStaticVertecies(rect):
     return ((rect[0], rect[1]), (rect[0]+rect[2], rect[1]), (rect[0]+rect[2], rect[1]+rect[3]), (rect[0], rect[1]+rect[3]))
 
 
-def rotatedPoints(rect, angle, skewAngle=0, hypotnuseLength=0):
+def getRotatedVertecies(rect, angle, skewAngle=0, hypotnuseLength=0):
     # deg to rad
     radAngle = angle*math.pi/180
     radAngle=-radAngle
@@ -49,17 +49,14 @@ def rotatedPoints(rect, angle, skewAngle=0, hypotnuseLength=0):
     vertecies[2] = (x+math.cos(radAngle+skewAngle)*hypotnuseLength, y+math.sin(radAngle+skewAngle)*hypotnuseLength)#bottomRight
 
     # debuging
-    for i in range(0,4):
-        #print("x, y "+str(i)+": ",vertecies[i][0], vertecies[i][1])
-        pygame.draw.circle(window, (255,0,0), (vertecies[i][0], vertecies[i][1]), 3)
+    #for i in range(0,4):
+    #    #print("x, y "+str(i)+": ",vertecies[i][0], vertecies[i][1])
+    #    pygame.draw.circle(window, (255,0,0), (vertecies[i][0], vertecies[i][1]), 3)
     # end debuging
 
-    print(vertecies)
     return vertecies
 
 def polygonColide(verteciesA, verteciesB):
-    #verteciesA=[(0, 0),(0, 0),(0, 0),(0, 0)]
-    #verteciesB=[(0, 0),(0, 0),(0, 0),(0, 0)]
     for i in range(len(verteciesA)):
         vertexA = verteciesA[i]
         vertexB = verteciesA[(i+1) % len(verteciesA)]
@@ -91,10 +88,11 @@ def polygonColide(verteciesA, verteciesB):
         
 
 def projectVertecies(vertecies, axis):
-    min = 999999999999999999999999999999
-    max = -999999999999999999999999999999
+    min = 1.7976931348623157e+308
+    max = -1.7976931348623157e+308
 
     for i in range(len(vertecies)):
+
         vertex = vertecies[i]
         projection = dotProduct(vertex, axis)
         
@@ -285,7 +283,7 @@ while run:
 
         # Drawing car
         window.blit(carRotated, carFinal)
-        rotatedPoints((carPos[0], carPos[1], carWidth, carHeight), angle, carSkewAngle, carHypotnuseLength)
+        getRotatedVertecies((carPos[0], carPos[1], carWidth, carHeight), angle, carSkewAngle, carHypotnuseLength)
 
         # Drawing particles
         for i in range(len(particlesPos)):
@@ -294,7 +292,7 @@ while run:
             particlesPos[i][1] -= scroll[1]
 
             #if colide((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight), (carPos[0], carPos[1], carWidth, carHeight)):
-            if polygonColide(rotatedPoints((carPos[0], carPos[1], carWidth, carHeight), angle, carSkewAngle, carHypotnuseLength), getStaticVertecies((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))):
+            if polygonColide(getRotatedVertecies((carPos[0], carPos[1], carWidth, carHeight), angle, carSkewAngle, carHypotnuseLength), getStaticVertecies((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))):
                 #particlesPos.remove(particlesPos[i])
                 pygame.draw.rect(window, particleCollideColor, (particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))
             else:
