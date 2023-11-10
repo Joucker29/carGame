@@ -13,6 +13,45 @@ def colide(rect1, rect2):
         colision = True
     return colision
 
+def rotatedPoints(rect, angle):
+    # deg to rad
+    radAngle = angle*math.pi/180
+    radAngle=-radAngle
+
+    
+    #radAngle=-radAngle
+    #radAngle = radAngle-math.pi/2
+
+    x=rect[0]
+    y=rect[1]
+    _width=rect[2]
+    _height=rect[3]
+
+    vertecies = [(0, 0),(0, 0),(0, 0),(0, 0)]
+    origVertecies = [(0, 0),(0, 0),(0, 0),(0, 0)]
+
+
+    pointLength = math.sqrt(((_width/2)**2)+((_height/2)**2))
+    skewAngle = math.acos((_width/2)/(((_width/2)**2+(_height/2)**2)**0.5))
+
+    origVertecies[0] = (x-_width/2, y-_height/2)
+
+    #print(radAngle)
+    #print(x,y)
+    vertecies[0] = (x+math.cos(radAngle-skewAngle-math.pi)*pointLength, y+math.sin(radAngle-skewAngle-math.pi)*pointLength)#topLeft
+    vertecies[1] = (x+math.cos(radAngle-skewAngle)*pointLength, y+math.sin(radAngle-skewAngle)*pointLength)#topRight
+    vertecies[3] = (x+math.cos(radAngle+skewAngle+math.pi)*pointLength, y+math.sin(radAngle+skewAngle+math.pi)*pointLength)#bottomLeft
+    vertecies[2] = (x+math.cos(radAngle+skewAngle)*pointLength, y+math.sin(radAngle+skewAngle)*pointLength)#bottomRight
+
+
+    #pygame.draw.rect(window, (255,0,0), (vertecies[0][0], vertecies[0][1], 3, 3))
+    for i in range(0,4):
+        print("x, y "+str(i)+": ",vertecies[i][0], vertecies[i][1])
+        pygame.draw.circle(window, (255,0,0), (vertecies[i][0], vertecies[i][1]), 3)
+
+    
+    
+
 
 pygame.init()
 
@@ -28,26 +67,26 @@ windowHeight = int((windowWidth/16)*9)
 window = pygame.display.set_mode((windowWidth, windowHeight))
 
 
-width = 5
-height = 10
+width = 20
+height = 40
 
-carPos = [windowWidth/2 - width/2, windowHeight/2 - height/2]
+carPos = [windowWidth/2 - width/2, windowHeight/2 - height/2, width, height]
+
+carSprite = pygame.image.load("car.png").convert_alpha()
+carSprite = pygame.transform.scale(carSprite, (width, height))
+carSpriteMask = pygame.mask.from_surface(carSprite)
 
 angle = 0
 langle = 0
 
 rotSpeed = 1
-
-
+ 
 drag = 0.001
 breakSpeed = 0.02
 acceleration = 0.02
 curSpeed = 0
 maxSpeedForward = 1.5
 maxSpeedBackwards = -0.5
-
-carSprite = pygame.image.load("car.png")
-carSprite = pygame.transform.scale(carSprite, (width, height))
 
 # Scroll
 scroll = [0, 0]
@@ -58,11 +97,12 @@ scrollHeightDisplacment = windowHeight/15
 
 # Particles:
 particlesPos = []
-particleAmount = 50
+particleAmount = 2
 particleRadius = 2
-particleWidth = 2
-particleHeight = 2
+particleWidth = 50
+particleHeight = particleWidth
 particleColor = (255, 255, 255)
+particleCollideColor = (255, 0, 0)
 
 for i in range(particleAmount):
     particlesPos.append([random.randint(0, windowWidth), random.randint(0, windowHeight)])
@@ -189,14 +229,17 @@ while run:
 
         # Drawing car
         window.blit(carRotated, carFinal)
+        rotatedPoints((carPos[0], carPos[1], width, height), angle)
 
         # Drawing particles
         for i in range(len(particlesPos)):
+            #print(particlesPos[i])
             particlesPos[i][0] -= scroll[0]
             particlesPos[i][1] -= scroll[1]
 
             if colide((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight), (carPos[0], carPos[1], width, height)):
-                particlesPos.remove(particlesPos[i])
+                #particlesPos.remove(particlesPos[i])
+                pygame.draw.rect(window, particleCollideColor, (particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))
             else:
                 pygame.draw.rect(window, particleColor, (particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))
 
@@ -206,3 +249,4 @@ while run:
 
     lastPaused = keyPressed[pygame.K_p]
     clock.tick(TPS)
+exit()
