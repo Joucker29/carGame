@@ -24,6 +24,10 @@ def colide(rect1, rect2):
         colision = True
     return colision
 
+def getStaticVertecies(rect):
+    return ((rect[0], rect[1]), (rect[0]+rect[2], rect[1]), (rect[0]+rect[2], rect[1]+rect[3]), (rect[0], rect[1]+rect[3]))
+
+
 def rotatedPoints(rect, angle, skewAngle=0, hypotnuseLength=0):
     # deg to rad
     radAngle = angle*math.pi/180
@@ -290,7 +294,7 @@ while run:
             particlesPos[i][1] -= scroll[1]
 
             #if colide((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight), (carPos[0], carPos[1], carWidth, carHeight)):
-            if polygonColide(rotatedPoints((carPos[0], carPos[1], carWidth, carHeight), angle, carSkewAngle, carHypotnuseLength), ((particlesPos[i][0], particlesPos[i][1]), (particlesPos[i][0]+particleWidth, particlesPos[i][1]), (particlesPos[i][0]+particleWidth, particlesPos[i][1]+particleHeight), (particlesPos[i][0], particlesPos[i][1]+particleHeight))):
+            if polygonColide(rotatedPoints((carPos[0], carPos[1], carWidth, carHeight), angle, carSkewAngle, carHypotnuseLength), getStaticVertecies((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))):
                 #particlesPos.remove(particlesPos[i])
                 pygame.draw.rect(window, particleCollideColor, (particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))
             else:
