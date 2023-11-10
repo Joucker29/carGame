@@ -1,5 +1,16 @@
 import pygame, sys, random, math
 
+def addVector(v1, v2):
+    return [x+y for x,y in zip(v1,v2)]
+
+def subVector(v1,v2):
+    return [x-y for x,y in zip(v1,v2)]
+
+def dotProduct(vector1, vector2):
+    return sum([i*j for (i, j) in zip(vector1, vector2)])
+
+
+
 def sign(num):
     result = 1
     if num < 0:
@@ -13,7 +24,7 @@ def colide(rect1, rect2):
         colision = True
     return colision
 
-def rotatedPoints(rect, angle, skewAngle=False, hypotnuseLength=False):
+def rotatedPoints(rect, angle, skewAngle=0, hypotnuseLength=0):
     # deg to rad
     radAngle = angle*math.pi/180
     radAngle=-radAngle
@@ -22,9 +33,9 @@ def rotatedPoints(rect, angle, skewAngle=False, hypotnuseLength=False):
     y=rect[1]
     vertecies = [(0, 0),(0, 0),(0, 0),(0, 0)]
 
-    if (skewAngle == False):
+    if (skewAngle == 0):
         skewAngle = math.acos((rect[2]/2)/(((rect[2]/2)**2+(rect[3]/2)**2)**0.5))
-    if (hypotnuseLength == False):
+    if (hypotnuseLength == 0):
         hypotnuseLength = math.sqrt(((rect[2]/2)**2)+((rect[3]/2)**2))
 
 
@@ -35,10 +46,60 @@ def rotatedPoints(rect, angle, skewAngle=False, hypotnuseLength=False):
 
     # debuging
     for i in range(0,4):
-        print("x, y "+str(i)+": ",vertecies[i][0], vertecies[i][1])
+        #print("x, y "+str(i)+": ",vertecies[i][0], vertecies[i][1])
         pygame.draw.circle(window, (255,0,0), (vertecies[i][0], vertecies[i][1]), 3)
+    # end debuging
 
+    print(vertecies)
+    return vertecies
+
+def polygonColide(verteciesA, verteciesB):
+    #verteciesA=[(0, 0),(0, 0),(0, 0),(0, 0)]
+    #verteciesB=[(0, 0),(0, 0),(0, 0),(0, 0)]
+    for i in range(len(verteciesA)):
+        vertexA = verteciesA[i]
+        vertexB = verteciesA[(i+1) % len(verteciesA)]
+
+        edge = subVector(vertexB,vertexA)
+        axis = (-edge[1], edge[0]) # normal
+
+        minA, maxA = projectVertecies(verteciesA, axis)
+        minB, maxB = projectVertecies(verteciesB ,axis)
+
+        if minA >= maxB or minB >= maxA:
+            return False
+
+
+    for i in range(len(verteciesB)):
+        vertexA = verteciesB[i]
+        vertexB = verteciesB[(i+1) % len(verteciesB)]
+
+        edge = subVector(vertexB,vertexA)
+        axis = (-edge[1], edge[0]) # normal
+
+        minA, maxA = projectVertecies(verteciesA, axis)
+        minB, maxB = projectVertecies(verteciesB ,axis)
+
+        if minA >= maxB or minB >= maxA:
+            return False
     
+    return True
+        
+
+def projectVertecies(vertecies, axis):
+    min = 999999999999999999999999999999
+    max = -999999999999999999999999999999
+
+    for i in range(len(vertecies)):
+        vertex = vertecies[i]
+        projection = dotProduct(vertex, axis)
+        
+        if projection < min:
+            min = projection
+        if projection > max:
+            max = projection
+    
+    return min, max
 
 
 pygame.init()
@@ -228,7 +289,8 @@ while run:
             particlesPos[i][0] -= scroll[0]
             particlesPos[i][1] -= scroll[1]
 
-            if colide((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight), (carPos[0], carPos[1], carWidth, carHeight)):
+            #if colide((particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight), (carPos[0], carPos[1], carWidth, carHeight)):
+            if polygonColide(rotatedPoints((carPos[0], carPos[1], carWidth, carHeight), angle, carSkewAngle, carHypotnuseLength), ((particlesPos[i][0], particlesPos[i][1]), (particlesPos[i][0]+particleWidth, particlesPos[i][1]), (particlesPos[i][0]+particleWidth, particlesPos[i][1]+particleHeight), (particlesPos[i][0], particlesPos[i][1]+particleHeight))):
                 #particlesPos.remove(particlesPos[i])
                 pygame.draw.rect(window, particleCollideColor, (particlesPos[i][0], particlesPos[i][1], particleWidth, particleHeight))
             else:
